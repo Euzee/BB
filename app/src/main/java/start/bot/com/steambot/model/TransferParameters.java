@@ -93,7 +93,7 @@ public class TransferParameters {
      * @return The rememberLogin
      */
     public boolean isRememberLogin() {
-        return rememberLogin;
+        return true;
     }
 
     /**
