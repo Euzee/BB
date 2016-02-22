@@ -43,6 +43,7 @@ import start.bot.com.steambot.model.IResponse;
 import start.bot.com.steambot.model.LoginResponse;
 import start.bot.com.steambot.model.RSAResponse;
 import start.bot.com.steambot.model.TransferParameters;
+import start.bot.com.steambot.utils.BaseActivity;
 import start.bot.com.steambot.utils.CipherHandler;
 import start.bot.com.steambot.utils.Keys;
 import start.bot.com.steambot.utils.PM;
@@ -57,7 +58,7 @@ import static android.Manifest.permission.READ_CONTACTS;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends BaseActivity implements LoaderCallbacks<Cursor> {
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -81,6 +82,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(0, android.R.anim.fade_in);
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.login);
@@ -155,24 +157,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         };
         loadTestUser();
-        checkSession();
     }
 
     private void loadTestUser() {
         mEmailView.setText(URLS.TEST_USER);
         mPasswordView.setText(URLS.TEST_PASS);
-    }
-
-    private void checkSession() {
-        post(new TransferRequest(PM.getInstance().getObjectByClass(TransferParameters.class), new Response.Listener<TransferParameters>() {
-            @Override
-            public void onResponse(TransferParameters params) {
-                if (params == null)
-                    attemptLogin();
-                else
-                    setLoginMessage();
-            }
-        }));
     }
 
     private void setLoginMessage() {
@@ -302,10 +291,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         map.put(Keys.PASSWORD, CipherHandler.parseCipher(model, mPasswordView.getText().toString()));
         map.put(Keys.TIMESTAMP, model.getTimestamp());
         return map;
-    }
-
-    private void post(Request<?> request) {
-        App.getInstance().getRequestQueue().add(request);
     }
 
     private Map<String, String> getUserNameParams() {
