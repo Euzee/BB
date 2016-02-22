@@ -49,7 +49,6 @@ import start.bot.com.steambot.utils.PM;
 import start.bot.com.steambot.utils.URLS;
 import start.bot.com.steambot.volley.CaptchaRequest;
 import start.bot.com.steambot.volley.GetRSARequest;
-import start.bot.com.steambot.volley.HomeRequest;
 import start.bot.com.steambot.volley.TransferRequest;
 import start.bot.com.steambot.volley.LoginRequest;
 
@@ -84,7 +83,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.login);
         mResultView = (TextView) findViewById(R.id.result_text);
         populateAutoComplete();
 
@@ -155,7 +154,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             }
         };
+        loadTestUser();
         checkSession();
+    }
+
+    private void loadTestUser() {
+        mEmailView.setText(URLS.TEST_USER);
+        mPasswordView.setText(URLS.TEST_PASS);
     }
 
     private void checkSession() {
@@ -234,9 +239,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-//        if (mAuthTask != null) {
-//            return;
-//        }
 
         // Reset errors.
         mEmailView.setError(null);
@@ -261,10 +263,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
         }
 
         if (cancel) {
@@ -275,7 +273,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            post(new GetRSARequest(getLiteParams(), new Response.Listener<RSAResponse>() {
+            post(new GetRSARequest(getUserNameParams(), new Response.Listener<RSAResponse>() {
                 @Override
                 public void onResponse(RSAResponse response) {
                     if (response.isSuccess()) {
@@ -300,9 +298,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private Map<String, String> getLoginParams() {
-        HashMap<String, String> map = new HashMap<>();
-        map.put(Keys.USERNAME, URLS.TEST_USER);
-        map.put(Keys.PASSWORD, CipherHandler.parseCipher(model, URLS.TEST_PASS));
+        Map<String, String> map = getUserNameParams();
+        map.put(Keys.PASSWORD, CipherHandler.parseCipher(model, mPasswordView.getText().toString()));
         map.put(Keys.TIMESTAMP, model.getTimestamp());
         return map;
     }
@@ -311,20 +308,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         App.getInstance().getRequestQueue().add(request);
     }
 
-    private Map<String, String> getLiteParams() {
+    private Map<String, String> getUserNameParams() {
         HashMap<String, String> map = new HashMap<>();
-        map.put(Keys.USERNAME, URLS.TEST_USER);
+        map.put(Keys.USERNAME, mEmailView.getText().toString());
         return map;
     }
 
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
-    }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 6;
     }
 
     /**
