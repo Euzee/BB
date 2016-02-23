@@ -42,7 +42,7 @@ public class Splash extends BaseActivity {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                    if (params != null) {
+                    if (params == null) {
                         startActivity(new Intent(Splash.this, LoginActivity.class));
                         finish();
                     }
@@ -85,17 +85,14 @@ public class Splash extends BaseActivity {
     }
 
     private void animateView(View view, Animator.AnimatorListener listener) {
-        view.animate().translationY(detectPosition())
+        view.animate().translationY(detectPosition(view))
                 .setDuration(ANIMATION_DURATION)
                 .alpha(1)
                 .setListener(listener);
     }
 
-    private float detectPosition() {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int height = size.y;
-        return -(Util.convertPixelsToDp(height, this));
+    private float detectPosition(View view) {
+        ((ViewGroup) view.getParent()).measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
+        return -(view.getMeasuredHeight());
     }
 }
